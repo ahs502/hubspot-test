@@ -18,6 +18,7 @@ import {
 import { fade, makeStyles } from "@material-ui/core/styles";
 import { Search as SearchIcon, Add as AddIcon } from "@material-ui/icons";
 import queryString from "query-string";
+import classNames from "classnames";
 
 const useStyles = makeStyles(theme => ({
   pageTitle: {
@@ -75,6 +76,7 @@ const ListingPage = () => {
   let sortDirection = params.get("sort_direction") || "asc";
   let pageSize = Number(params.get("page[size]") || 10);
   let pageNumber = Number(params.get("page[number]") || 1);
+  query || setQueryParams();
 
   const [data, setData] = useState(null);
 
@@ -121,7 +123,7 @@ const ListingPage = () => {
             placeholder="Search…"
             classes={{
               root: classes.inputRoot,
-              input: classes.inputInput
+              input: classNames(classes.inputInput, "listing-search-selector")
             }}
             inputProps={{ "aria-label": "search" }}
             value={searchPhrase}
@@ -132,7 +134,12 @@ const ListingPage = () => {
           />
         </div>
         <div className={classes.grow}></div>
-        <IconButton component={"a"} href="/new-feature" color="inherit">
+        <IconButton
+          component={"a"}
+          href="/new-feature"
+          color="inherit"
+          classes={{ root: "listing-new-feature-link-selector" }}
+        >
           <AddIcon color=""></AddIcon>
         </IconButton>
       </Header>
@@ -159,13 +166,14 @@ const ListingPage = () => {
                               sortDirection === "asc" ? "desc" : "asc";
                             setQueryParams();
                           }}
+                          classes={{ root: "listing-sort-direction-selector" }}
                         >
                           Label
                         </TableSortLabel>
                       </TableCell>
                     </TableRow>
                   </TableHead>
-                  <TableBody>
+                  <TableBody className="listing-table-body-selector">
                     {items.map((item, index) => (
                       <TableRow key={index}>
                         <TableCell>{item.type}</TableCell>
