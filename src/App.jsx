@@ -1,5 +1,4 @@
 import React, { Fragment } from "react";
-import "./App.css";
 import ListingPage from "./pages/listing";
 import NewFeaturePage from "./pages/new-feature";
 
