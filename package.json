@@ -7,9 +7,9 @@
     "@material-ui/icons": "^4.4.3",
     "@material-ui/styles": "^4.4.3",
     "cypress": "^3.4.1",
+    "query-string": "^6.8.3",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
-    "react-router-dom": "^5.0.1",
     "react-scripts": "3.1.2",
     "typeface-roboto": "0.0.75"
   },
@@ -35,8 +35,8 @@
     ]
   },
   "devDependencies": {
+    "@types/query-string": "^6.3.0",
     "@types/react": "^16.9.2",
-    "@types/react-dom": "^16.9.0",
-    "@types/react-router-dom": "^4.3.5"
+    "@types/react-dom": "^16.9.0"
   }
 }
