@@ -1,11 +1,12 @@
 import React, { Fragment } from "react";
 import Header from "../components/Header";
+import Body from "../components/Body";
 
 const ListingPage = ({ match }) => {
   return (
     <Fragment>
       <Header>Listing</Header>
-      <div>Listing</div>
+      <Body>Listing</Body>
     </Fragment>
   );
 };

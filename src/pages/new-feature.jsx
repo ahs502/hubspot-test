@@ -1,11 +1,12 @@
 import React, { Fragment } from "react";
-import { Header } from "../components/Header";
+import Header from "../components/Header";
+import Body from "../components/Body";
 
 const NewFeaturePage = ({ match }) => {
   return (
     <Fragment>
       <Header>New Feature</Header>
-      <div>New Feature</div>
+      <Body>New Feature</Body>
     </Fragment>
   );
 };
