@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useState, useEffect } from "react";
 import Header from "../components/Header";
 import Body from "../components/Body";
 import {
@@ -68,15 +68,39 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const ListingPage = ({ match }) => {
-  const totalNumberOfItems = 123;
-  const items = [
-    { type: "t1", label: "label1" },
-    { type: "t2", label: "label2" }
-  ];
-  const sortDirection = "desc";
-  const pageSize = 10;
-  const pageNumber = 0;
+const ListingPage = ({ match, location }) => {
+  const params = new URLSearchParams(location.search);
+  const searchPhrase = params.get("search") || "";
+  const sortDirection = params.get("sort_direction") || "asc";
+  const pageSize = Number(params.get("page[size]") || 10);
+  const pageNumber = Number(params.get("page[number]") || 1);
+
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    fetch(
+      `https://hur-pages-api.herokuapp.com/api/authorization/rights_and_roles_elements${location.search}`
+    )
+      .then(response => {
+        if (response.ok) return response.json();
+        throw new Error("Response is not ok.");
+      })
+      .then(
+        data => setData(data),
+        error => {
+          alert("Some error happened when fetching data.");
+          console.error(error);
+        }
+      );
+    return () => setData(null);
+  }, [location.search]);
+
+  const items =
+    data &&
+    data.included.map(item => ({
+      type: item.type,
+      label: item.attributes.label
+    }));
 
   const classes = useStyles();
 
@@ -97,6 +121,10 @@ const ListingPage = ({ match }) => {
               input: classes.inputInput
             }}
             inputProps={{ "aria-label": "search" }}
+            value={searchPhrase}
+            onChange={event => {
+              alert(event.target.value);
+            }}
           />
         </div>
         <div className={classes.grow}></div>
@@ -105,59 +133,64 @@ const ListingPage = ({ match }) => {
         </IconButton>
       </Header>
       <Body>
-        <Typography variant="subtitle1">
-          <strong>{totalNumberOfItems} </strong>
-          item{totalNumberOfItems === 1 ? "" : "s"} found
-        </Typography>
-        <Paper classes={{ root: classes.tableRoot }}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Type</TableCell>
-                <TableCell sortDirection={sortDirection}>
-                  <TableSortLabel
-                    active={true}
-                    direction={sortDirection}
-                    onClick={() => {
-                      alert("Not implemented.");
-                    }}
-                  >
-                    Label
-                  </TableSortLabel>
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {items.map((item, index) => (
-                <TableRow key={index}>
-                  <TableCell>{item.type}</TableCell>
-                  <TableCell>{item.label}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-            <TableFooter>
-              <TableRow>
-                <TablePagination
-                  rowsPerPageOptions={[5, 10, 20]}
-                  colSpan={2}
-                  count={totalNumberOfItems}
-                  rowsPerPage={pageSize}
-                  page={pageNumber}
-                  SelectProps={{
-                    inputProps: { "aria-label": "rows per page" },
-                    native: true
-                  }}
-                  onChangePage={() => {
-                    alert("Not implemented.");
-                  }}
-                  onChangeRowsPerPage={() => {
-                    alert("Not implemented.");
-                  }}
-                ></TablePagination>
-              </TableRow>
-            </TableFooter>
-          </Table>
-        </Paper>
+        {!data && <Typography variant="subtitle1">Loading data...</Typography>}
+        {data && (
+          <Fragment>
+            <Typography variant="subtitle1">
+              <strong>{data.meta.total_entries} </strong>
+              item{data.meta.total_entries === 1 ? "" : "s"} found
+            </Typography>
+            <Paper classes={{ root: classes.tableRoot }}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Type</TableCell>
+                    <TableCell sortDirection={sortDirection}>
+                      <TableSortLabel
+                        active={true}
+                        direction={sortDirection}
+                        onClick={() => {
+                          alert("Not implemented.");
+                        }}
+                      >
+                        Label
+                      </TableSortLabel>
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {items.map((item, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{item.type}</TableCell>
+                      <TableCell>{item.label}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+                <TableFooter>
+                  <TableRow>
+                    <TablePagination
+                      rowsPerPageOptions={[5, 10, 20]}
+                      colSpan={2}
+                      count={data.meta.total_entries}
+                      rowsPerPage={pageSize}
+                      page={pageNumber}
+                      SelectProps={{
+                        inputProps: { "aria-label": "rows per page" },
+                        native: true
+                      }}
+                      onChangePage={() => {
+                        alert("Not implemented.");
+                      }}
+                      onChangeRowsPerPage={() => {
+                        alert("Not implemented.");
+                      }}
+                    ></TablePagination>
+                  </TableRow>
+                </TableFooter>
+              </Table>
+            </Paper>
+          </Fragment>
+        )}
       </Body>
     </Fragment>
   );
