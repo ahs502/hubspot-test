@@ -17,7 +17,7 @@ import {
 } from "@material-ui/core";
 import { fade, makeStyles } from "@material-ui/core/styles";
 import { Search as SearchIcon, Add as AddIcon } from "@material-ui/icons";
-import { Link } from "react-router-dom";
+import queryString from "query-string";
 
 const useStyles = makeStyles(theme => ({
   pageTitle: {
@@ -68,18 +68,19 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const ListingPage = ({ match, location }) => {
-  const params = new URLSearchParams(location.search);
-  const searchPhrase = params.get("search") || "";
-  const sortDirection = params.get("sort_direction") || "asc";
-  const pageSize = Number(params.get("page[size]") || 10);
-  const pageNumber = Number(params.get("page[number]") || 1);
+const ListingPage = () => {
+  const [query, setQuery] = useState(window.location.search.slice(1));
+  const params = new URLSearchParams(query);
+  let searchPhrase = params.get("search") || "";
+  let sortDirection = params.get("sort_direction") || "asc";
+  let pageSize = Number(params.get("page[size]") || 10);
+  let pageNumber = Number(params.get("page[number]") || 1);
 
   const [data, setData] = useState(null);
 
   useEffect(() => {
     fetch(
-      `https://hur-pages-api.herokuapp.com/api/authorization/rights_and_roles_elements${location.search}`
+      `https://hur-pages-api.herokuapp.com/api/authorization/rights_and_roles_elements?${query}`
     )
       .then(response => {
         if (response.ok) return response.json();
@@ -93,14 +94,16 @@ const ListingPage = ({ match, location }) => {
         }
       );
     return () => setData(null);
-  }, [location.search]);
+  }, [query]);
 
   const items =
-    data &&
-    data.included.map(item => ({
-      type: item.type,
-      label: item.attributes.label
-    }));
+    (data &&
+      data.included &&
+      data.included.map(item => ({
+        type: item.type,
+        label: item.attributes.label
+      }))) ||
+    [];
 
   const classes = useStyles();
 
@@ -123,12 +126,13 @@ const ListingPage = ({ match, location }) => {
             inputProps={{ "aria-label": "search" }}
             value={searchPhrase}
             onChange={event => {
-              alert(event.target.value);
+              searchPhrase = event.target.value;
+              setQueryParams();
             }}
           />
         </div>
         <div className={classes.grow}></div>
-        <IconButton component={Link} to="/new-feature" color="inherit">
+        <IconButton component={"a"} href="/new-feature" color="inherit">
           <AddIcon color=""></AddIcon>
         </IconButton>
       </Header>
@@ -140,60 +144,82 @@ const ListingPage = ({ match, location }) => {
               <strong>{data.meta.total_entries} </strong>
               item{data.meta.total_entries === 1 ? "" : "s"} found
             </Typography>
-            <Paper classes={{ root: classes.tableRoot }}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Type</TableCell>
-                    <TableCell sortDirection={sortDirection}>
-                      <TableSortLabel
-                        active={true}
-                        direction={sortDirection}
-                        onClick={() => {
-                          alert("Not implemented.");
-                        }}
-                      >
-                        Label
-                      </TableSortLabel>
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {items.map((item, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{item.type}</TableCell>
-                      <TableCell>{item.label}</TableCell>
+            {items.length > 0 && (
+              <Paper classes={{ root: classes.tableRoot }}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Type</TableCell>
+                      <TableCell sortDirection={sortDirection}>
+                        <TableSortLabel
+                          active={true}
+                          direction={sortDirection}
+                          onClick={() => {
+                            sortDirection =
+                              sortDirection === "asc" ? "desc" : "asc";
+                            setQueryParams();
+                          }}
+                        >
+                          Label
+                        </TableSortLabel>
+                      </TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-                <TableFooter>
-                  <TableRow>
-                    <TablePagination
-                      rowsPerPageOptions={[5, 10, 20]}
-                      colSpan={2}
-                      count={data.meta.total_entries}
-                      rowsPerPage={pageSize}
-                      page={pageNumber}
-                      SelectProps={{
-                        inputProps: { "aria-label": "rows per page" },
-                        native: true
-                      }}
-                      onChangePage={() => {
-                        alert("Not implemented.");
-                      }}
-                      onChangeRowsPerPage={() => {
-                        alert("Not implemented.");
-                      }}
-                    ></TablePagination>
-                  </TableRow>
-                </TableFooter>
-              </Table>
-            </Paper>
+                  </TableHead>
+                  <TableBody>
+                    {items.map((item, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{item.type}</TableCell>
+                        <TableCell>{item.label}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                  <TableFooter>
+                    <TableRow>
+                      <TablePagination
+                        rowsPerPageOptions={[5, 10, 20]}
+                        colSpan={2}
+                        count={data.meta.total_entries}
+                        rowsPerPage={pageSize}
+                        page={pageNumber - 1}
+                        SelectProps={{
+                          inputProps: { "aria-label": "rows per page" },
+                          native: true
+                        }}
+                        onChangePage={(event, newPage) => {
+                          pageNumber = Number(newPage) + 1;
+                          setQueryParams();
+                        }}
+                        onChangeRowsPerPage={event => {
+                          pageSize = Number(event.target.value);
+                          setQueryParams();
+                        }}
+                      ></TablePagination>
+                    </TableRow>
+                  </TableFooter>
+                </Table>
+              </Paper>
+            )}
           </Fragment>
         )}
       </Body>
     </Fragment>
   );
+
+  function setQueryParams() {
+    const newQuery = queryString.stringify({
+      search: searchPhrase,
+      sort_direction: sortDirection,
+      sort_type: "label",
+      "page[size]": String(pageSize),
+      "page[number]": String(pageNumber)
+    });
+    window.history.pushState(
+      "",
+      "",
+      window.location.origin + window.location.pathname + "?" + newQuery
+    );
+    setQuery(newQuery);
+  }
 };
 
 export default ListingPage;

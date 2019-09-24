@@ -2,7 +2,7 @@ import React, { Fragment } from "react";
 import Header from "../components/Header";
 import Body from "../components/Body";
 
-const NewFeaturePage = ({ match }) => {
+const NewFeaturePage = () => {
   return (
     <Fragment>
       <Header>New Feature</Header>

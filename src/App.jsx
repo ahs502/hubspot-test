@@ -1,15 +1,22 @@
-import React from "react";
+import React, { Fragment } from "react";
 import "./App.css";
-import { HashRouter as Router, Route, Redirect } from "react-router-dom";
 import ListingPage from "./pages/listing";
 import NewFeaturePage from "./pages/new-feature";
 
-const App = () => (
-  <Router forceRefresh={false}>
-    <Route path="/listing" component={ListingPage}></Route>
-    <Route path="/new-feature" exact component={NewFeaturePage}></Route>
-    <Redirect to="/listing"></Redirect>
-  </Router>
-);
+const App = () => {
+  const page = window.location.pathname;
+  const listingPage = page === "/listing";
+  const newFeaturePage = page === "/new-feature";
+  if (!listingPage && !newFeaturePage) {
+    window.location.href = window.location.origin + "/listing";
+  }
+
+  return (
+    <Fragment>
+      {listingPage && <ListingPage></ListingPage>}
+      {newFeaturePage && <NewFeaturePage></NewFeaturePage>}
+    </Fragment>
+  );
+};
 
 export default App;
