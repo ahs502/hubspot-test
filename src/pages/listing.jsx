@@ -16,9 +16,7 @@ const ListingPage = () => {
   const [data, setData] = useState(null);
 
   useEffect(() => {
-    fetch(
-      `https://hur-pages-api.herokuapp.com/api/authorization/rights_and_roles_elements?${makeQueryParams()}`
-    )
+    fetch(`https://hur-pages-api.herokuapp.com/api/authorization/rights_and_roles_elements?${makeQueryParams()}`)
       .then(response => {
         if (response.ok) return response.json();
         throw new Error("Response is not ok.");
@@ -33,6 +31,7 @@ const ListingPage = () => {
     return () => setData(null);
   }, [query]);
 
+  const totalItemsCount = (data && data.meta && Number(data.meta.total_entries || 0)) || 0;
   const items =
     (data &&
       data.included &&
@@ -41,6 +40,14 @@ const ListingPage = () => {
         label: item.attributes.label
       }))) ||
     [];
+
+  if (data) {
+    const maximumPossiblePageNumber = Math.ceil(totalItemsCount / pageSize);
+    if (pageNumber > maximumPossiblePageNumber) {
+      pageNumber = maximumPossiblePageNumber;
+      setQueryParams();
+    }
+  }
 
   return (
     <Fragment>
@@ -56,12 +63,12 @@ const ListingPage = () => {
         {data && (
           <Fragment>
             <Typography variant="subtitle1">
-              <strong>{data.meta.total_entries} </strong>
-              item{data.meta.total_entries === 1 ? "" : "s"} found
+              <strong>{totalItemsCount} </strong>
+              item{totalItemsCount === 1 ? "" : "s"} found
             </Typography>
             {items.length > 0 && (
               <ListingTable
-                totalItemsCount={data.meta.total_entries}
+                totalItemsCount={totalItemsCount}
                 sortDirection={sortDirection}
                 onSortDirectionChange={newSortDirection => {
                   sortDirection = newSortDirection;
@@ -97,11 +104,7 @@ const ListingPage = () => {
   }
   function setQueryParams() {
     const newQuery = makeQueryParams();
-    window.history.pushState(
-      "",
-      "",
-      window.location.origin + window.location.pathname + "?" + newQuery
-    );
+    window.history.pushState("", "", window.location.origin + window.location.pathname + "?" + newQuery);
     setQuery(newQuery);
   }
 };
