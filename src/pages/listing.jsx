@@ -42,7 +42,7 @@ const ListingPage = () => {
     [];
 
   if (data) {
-    const maximumPossiblePageNumber = Math.ceil(totalItemsCount / pageSize);
+    const maximumPossiblePageNumber = Math.max(Math.ceil(totalItemsCount / pageSize), 1);
     if (pageNumber > maximumPossiblePageNumber) {
       pageNumber = maximumPossiblePageNumber;
       setQueryParams();
