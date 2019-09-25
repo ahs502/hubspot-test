@@ -76,13 +76,12 @@ const ListingPage = () => {
   let sortDirection = params.get("sort_direction") || "asc";
   let pageSize = Number(params.get("page[size]") || 10);
   let pageNumber = Number(params.get("page[number]") || 1);
-  query || setQueryParams();
 
   const [data, setData] = useState(null);
 
   useEffect(() => {
     fetch(
-      `https://hur-pages-api.herokuapp.com/api/authorization/rights_and_roles_elements?${query}`
+      `https://hur-pages-api.herokuapp.com/api/authorization/rights_and_roles_elements?${makeQueryParams()}`
     )
       .then(response => {
         if (response.ok) return response.json();
@@ -213,14 +212,17 @@ const ListingPage = () => {
     </Fragment>
   );
 
-  function setQueryParams() {
-    const newQuery = queryString.stringify({
+  function makeQueryParams() {
+    return queryString.stringify({
       search: searchPhrase,
       sort_direction: sortDirection,
       sort_type: "label",
       "page[size]": String(pageSize),
       "page[number]": String(pageNumber)
     });
+  }
+  function setQueryParams() {
+    const newQuery = makeQueryParams();
     window.history.pushState(
       "",
       "",

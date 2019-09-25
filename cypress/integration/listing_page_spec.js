@@ -3,10 +3,10 @@ describe("Listing page", () => {
     cy.visit("localhost:3000/listing").contains("Admin Tools");
   });
 
-  it("should allways have query params in url", () => {
+  it("should not initially have query params in url", () => {
     cy.visit("localhost:3000/listing")
       .location("search")
-      .should(search => expect(search).to.exist);
+      .should(search => expect(search).to.equal(""));
   });
 
   it("should be able to search", () => {
