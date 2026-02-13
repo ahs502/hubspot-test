@@ -31,11 +31,11 @@
     "@material-ui/icons": "^4.4.3",
     "@material-ui/styles": "^4.4.3",
     "classnames": "^2.2.6",
-    "cypress": "^3.4.1",
+    "cypress": "^15.10.0",
     "query-string": "^6.8.3",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
-    "react-scripts": "3.1.2",
+    "react-scripts": "5.0.1",
     "typeface-roboto": "0.0.75"
   },
   "devDependencies": {
